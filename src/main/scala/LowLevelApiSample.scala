@@ -1,9 +1,9 @@
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.model._
 
-import collection.JavaConversions._
+import collection.JavaConverters._
 
-object Main extends App {
+object LowLevelApiSample extends App {
   val client: AmazonDynamoDBClient = (new AmazonDynamoDBClient())
     .withEndpoint("http://localhost:8000")
 
@@ -23,8 +23,8 @@ object Main extends App {
         "Member"    -> new AttributeValue(Seq(
           "Ronnie James Dio",
           "Ritchie Blackmore"
-        ))
-      )
+        ).asJava)
+      ).asJava
     )),
     new WriteRequest(new PutRequest(
       Map(
@@ -33,8 +33,8 @@ object Main extends App {
         "Member"    -> new AttributeValue(Seq(
           "Graham Bonnet",
           "Ritchie Blackmore"
-        ))
-      )
+        ).asJava)
+      ).asJava
     )),
     new WriteRequest(new PutRequest(
       Map(
@@ -43,8 +43,8 @@ object Main extends App {
         "Member"    -> new AttributeValue(Seq(
           "James Hetfield",
           "Kirk Hammett"
-        ))
-      )
+        ).asJava)
+      ).asJava
     )),
     new WriteRequest(new PutRequest(
       Map(
@@ -53,15 +53,15 @@ object Main extends App {
         "Member"    -> new AttributeValue(Seq(
           "Ian Gillan",
           "Ritchie Blackmore"
-        ))
-      )
+        ).asJava)
+      ).asJava
     ))
-  )
+  ).asJava
 
   println(
     client.batchWriteItem(
       (new BatchWriteItemRequest())
-        .withRequestItems(Map("Music" -> batchWriteItems))
+        .withRequestItems(Map("Music" -> batchWriteItems).asJava)
     )
   )
 
@@ -75,8 +75,8 @@ object Main extends App {
   println(
     client.query(
       (new QueryRequest("Music"))
-        .withKeyConditions(Map("Artist" -> hashCondition))
-    ).getItems.map(_.toMap.prettyPrint)
+        .withKeyConditions(Map("Artist" -> hashCondition).asJava)
+    ).getItems.asScala.map(_.asScala.toMap.prettyPrint)
   )
 
   println("*** Query with Filter ***")
@@ -89,19 +89,19 @@ object Main extends App {
   println(
     client.query(
       (new QueryRequest("Music"))
-        .withKeyConditions(Map("Artist" -> hashCondition))
-        .withQueryFilter(Map("Vocal" -> filterCondition))
-    ).getItems.map(_.toMap.prettyPrint)
+        .withKeyConditions(Map("Artist" -> hashCondition).asJava)
+        .withQueryFilter(Map("Vocal" -> filterCondition).asJava)
+    ).getItems.asScala.map(_.asScala.toMap.prettyPrint)
   )
 
   println("*** Query with Limit ***")
   val limitQueryResult = client.query(
     (new QueryRequest("Music"))
-      .withKeyConditions(Map("Artist" -> hashCondition))
+      .withKeyConditions(Map("Artist" -> hashCondition).asJava)
       .withLimit(1)
   )
   println(
-    limitQueryResult.getItems.map(_.toMap.prettyPrint)
+    limitQueryResult.getItems.asScala.map(_.asScala.toMap.prettyPrint)
   )
 
   println("*** Query with LastEvaluatedKey ***")
@@ -109,18 +109,16 @@ object Main extends App {
   println(
     client.query(
       (new QueryRequest("Music"))
-        .withKeyConditions(Map("Artist" -> hashCondition))
+        .withKeyConditions(Map("Artist" -> hashCondition).asJava)
         .withExclusiveStartKey(limitQueryResult.getLastEvaluatedKey)
-    ).getItems.map(_.toMap.prettyPrint)
+    ).getItems.asScala.map(_.asScala.toMap.prettyPrint)
   )
-
-  println("*** Query with Nested Item ***")
 
   println("*** Scan ***")
   println(
     client.scan(
       new ScanRequest("Music")
-    ).getItems.map(_.toMap.prettyPrint)
+    ).getItems.asScala.map(_.asScala.toMap.prettyPrint)
   )
 
   // http://stackoverflow.com/questions/32004050/pretty-print-a-nested-map-in-scala
