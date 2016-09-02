@@ -18,9 +18,10 @@ object LowLevelApiSample extends App {
   val batchWriteItems: java.util.List[WriteRequest] = Seq(
     new WriteRequest(new PutRequest(
       Map(
+
         "Artist"    -> new AttributeValue("Rainbow"),
         "SongTitle" -> new AttributeValue("Kill the King"),
-        "Member"    -> new AttributeValue(Seq(
+        "Members"    -> new AttributeValue(Seq(
           "Ronnie James Dio",
           "Ritchie Blackmore"
         ).asJava)
@@ -30,7 +31,7 @@ object LowLevelApiSample extends App {
       Map(
         "Artist"    -> new AttributeValue("Rainbow"),
         "SongTitle" -> new AttributeValue("All Night Long"),
-        "Member"    -> new AttributeValue(Seq(
+        "Members"   -> new AttributeValue(Seq(
           "Graham Bonnet",
           "Ritchie Blackmore"
         ).asJava)
@@ -40,7 +41,7 @@ object LowLevelApiSample extends App {
       Map(
         "Artist"    -> new AttributeValue("Metallica"),
         "SongTitle" -> new AttributeValue("Enter Sandman"),
-        "Member"    -> new AttributeValue(Seq(
+        "Members"   -> new AttributeValue(Seq(
           "James Hetfield",
           "Kirk Hammett"
         ).asJava)
@@ -50,7 +51,7 @@ object LowLevelApiSample extends App {
       Map(
         "Artist"    -> new AttributeValue("Deep Purple"),
         "SongTitle" -> new AttributeValue("Highway Star"),
-        "Member"    -> new AttributeValue(Seq(
+        "Members"   -> new AttributeValue(Seq(
           "Ian Gillan",
           "Ritchie Blackmore"
         ).asJava)
