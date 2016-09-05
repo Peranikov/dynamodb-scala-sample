@@ -9,6 +9,7 @@ class MusicItem {
   private var artist: String = _
   private var songTitle: String = _
   private var members: java.util.Set[String] = _
+  private var origin: String = _
 
   // Hash key
   @DynamoDBHashKey(attributeName="Artist")
@@ -20,6 +21,10 @@ class MusicItem {
   def getSongTitle: String = { this.songTitle }
   def setSongTitle(songTitle: String): Unit = { this.songTitle = songTitle }
 
+  @DynamoDBIndexRangeKey(attributeName="Origin", localSecondaryIndexName="OriginIndex")
+  def getOrigin: String = { this.origin }
+  def setOrigin(origin: String): Unit = { this.origin = origin }
+
   @DynamoDBAttribute(attributeName="Members")
   def getMembers: java.util.Set[String] = { this.members }
   def setMembers(members: java.util.Set[String]): Unit = { this.members = members }
@@ -28,6 +33,7 @@ class MusicItem {
     s"""{
        |  Artist: ${this.artist}
        |  SongTitle: ${this.songTitle}
+       |  Origin: ${this.origin}
        |  Members: ${this.members}
        |}""".stripMargin
   }
@@ -42,10 +48,11 @@ object MusicItem {
     item
   }
 
-  def apply(artist: String, songTitle: String, members: Set[String]): MusicItem = {
+  def apply(artist: String, songTitle: String, origin: String, members: Set[String]): MusicItem = {
     val item = new MusicItem()
     item.setArtist(artist)
     item.setSongTitle(songTitle)
+    item.setOrigin(origin)
     item.setMembers(members.asJava)
     item
   }
@@ -59,7 +66,7 @@ object HighLevelApiSample extends App {
 
   println("*** Save ***")
   println(
-    mapper.save(MusicItem("Guns N' Roses", "Welcome to the Jungle", Set("Axl Rose", "Slash")))
+    mapper.save(MusicItem("Guns N' Roses", "Welcome to the Jungle", "USA", Set("Axl Rose", "Slash")))
   )
 
   println("*** Load ***")
@@ -80,9 +87,9 @@ object HighLevelApiSample extends App {
   println("*** Batch Save ***")
   println(
     mapper.batchSave(Seq(
-      MusicItem("Black Sabbath", "Paranoid", Set("Ozzy Osbourne", "Tony Iommi")),
-      MusicItem("Black Sabbath", "Mr. Crowley", Set("Ozzy Osbourne", "Tony Iommi")),
-      MusicItem("Black Sabbath", "Heaven or Hell", Set("Ronnie James Dio", "Tony Iommi"))
+      MusicItem("Black Sabbath", "Paranoid", "England", Set("Ozzy Osbourne", "Tony Iommi")),
+      MusicItem("Black Sabbath", "Mr. Crowley", "England", Set("Ozzy Osbourne", "Tony Iommi")),
+      MusicItem("Black Sabbath", "Heaven or Hell", "England", Set("Ronnie James Dio", "Tony Iommi"))
     ).asJava)
   )
 
@@ -123,6 +130,20 @@ object HighLevelApiSample extends App {
         ).asJava)
         .withExclusiveStartKey(limitQueryResult.getLastEvaluatedKey)
     ).getResults.asScala
+  )
+
+  println("*** Query with Local Secondly Index ***")
+  println(
+    mapper.query(
+      classOf[MusicItem],
+      new DynamoDBQueryExpression[MusicItem]()
+        .withIndexName("OriginIndex")
+        .withKeyConditionExpression("Artist = :a and Origin = :o")
+        .withExpressionAttributeValues(Map(
+          ":a" -> new AttributeValue("Black Sabbath"),
+          ":o" -> new AttributeValue("England")
+        ).asJava)
+    ).asScala
   )
 
   println("*** Scan ***")
