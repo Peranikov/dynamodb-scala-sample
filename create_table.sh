@@ -14,4 +14,5 @@ aws dynamodb --endpoint-url "http://localhost:8000" create-table \
         AttributeName=SongTitle,KeyType=RANGE \
     --provisioned-throughput \
         ReadCapacityUnits=1,WriteCapacityUnits=1 \
-    --local-secondary-indexes "IndexName=OriginIndex,KeySchema=[{AttributeName=Artist,KeyType=HASH},{AttributeName=Origin,KeyType=RANGE}],Projection={ProjectionType=KEYS_ONLY}"
+    --local-secondary-indexes "IndexName=OriginIndex,KeySchema=[{AttributeName=Artist,KeyType=HASH},{AttributeName=Origin,KeyType=RANGE}],Projection={ProjectionType=KEYS_ONLY}" \
+    --global-secondary-indexes "IndexName=OriginGlobalIndex,KeySchema=[{AttributeName=Origin,KeyType=HASH},{AttributeName=Artist,KeyType=RANGE}],Projection={ProjectionType=KEYS_ONLY},ProvisionedThroughput={ReadCapacityUnits=1,WriteCapacityUnits=1}"

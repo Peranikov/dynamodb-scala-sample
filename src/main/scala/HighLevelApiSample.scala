@@ -13,6 +13,7 @@ class MusicItem {
 
   // Hash key
   @DynamoDBHashKey(attributeName="Artist")
+  @DynamoDBIndexRangeKey(attributeName="Artist", globalSecondaryIndexName="OriginGlobalIndex")
   def getArtist: String = { this.artist }
   def setArtist(artist: String): Unit = { this.artist = artist }
 
@@ -21,7 +22,8 @@ class MusicItem {
   def getSongTitle: String = { this.songTitle }
   def setSongTitle(songTitle: String): Unit = { this.songTitle = songTitle }
 
-  @DynamoDBIndexRangeKey(attributeName="Origin", localSecondaryIndexName="OriginIndex")
+  @DynamoDBIndexHashKey(attributeName="Origin", globalSecondaryIndexName="OriginGlobalIndex")
+  @DynamoDBIndexRangeKey(attributeName="Origin", localSecondaryIndexName="OriginIndex", globalSecondaryIndexName="OriginGlobalIndex")
   def getOrigin: String = { this.origin }
   def setOrigin(origin: String): Unit = { this.origin = origin }
 
@@ -89,7 +91,8 @@ object HighLevelApiSample extends App {
     mapper.batchSave(Seq(
       MusicItem("Black Sabbath", "Paranoid", "England", Set("Ozzy Osbourne", "Tony Iommi")),
       MusicItem("Black Sabbath", "Mr. Crowley", "England", Set("Ozzy Osbourne", "Tony Iommi")),
-      MusicItem("Black Sabbath", "Heaven or Hell", "England", Set("Ronnie James Dio", "Tony Iommi"))
+      MusicItem("Black Sabbath", "Heaven or Hell", "England", Set("Ronnie James Dio", "Tony Iommi")),
+      MusicItem("Queen", "Don't stop me now", "England", Set("Freddie Mercury", "Brian Harold May"))
     ).asJava)
   )
 
@@ -156,6 +159,22 @@ object HighLevelApiSample extends App {
           ":a" -> new AttributeValue("Black Sabbath"),
           ":o" -> new AttributeValue("England")
         ).asJava)
+    ).asScala
+  )
+
+  println("*** Query with Global Secondly Index ***")
+  println(
+    mapper.query(
+      classOf[MusicItem],
+      new DynamoDBQueryExpression[MusicItem]()
+        .withIndexName("OriginGlobalIndex")
+        .withKeyConditionExpression("Origin = :o")
+        .withExpressionAttributeValues(Map(
+          ":o" -> new AttributeValue("England")
+        ).asJava)
+        .withProjectionExpression("Origin, Artist")
+        .withScanIndexForward(false)
+        .withConsistentRead(false)
     ).asScala
   )
 
