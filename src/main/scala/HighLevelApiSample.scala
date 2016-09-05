@@ -1,6 +1,6 @@
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient
 import com.amazonaws.services.dynamodbv2.datamodeling.{DynamoDBQueryExpression, _}
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ConditionalOperator}
 
 import collection.JavaConverters._
 
@@ -130,6 +130,19 @@ object HighLevelApiSample extends App {
         ).asJava)
         .withExclusiveStartKey(limitQueryResult.getLastEvaluatedKey)
     ).getResults.asScala
+  )
+
+  println("*** Query with begins_with ***")
+  println(
+    mapper.query(
+      classOf[MusicItem],
+      new DynamoDBQueryExpression[MusicItem]()
+        .withKeyConditionExpression("Artist = :a and begins_with(SongTitle, :s)")
+        .withExpressionAttributeValues(Map(
+          ":a" -> new AttributeValue("Black Sabbath"),
+          ":s" -> new AttributeValue("Heaven")
+        ).asJava)
+    ).asScala
   )
 
   println("*** Query with Local Secondly Index ***")
